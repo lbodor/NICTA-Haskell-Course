@@ -189,7 +189,7 @@ infixr 5 ++
 flatten ::
   List (List a)
   -> List a
-flatten = foldLeft (++) Nil
+flatten = foldRight (++) Nil
 
 -- | Map a function then flatten to a list.
 --
