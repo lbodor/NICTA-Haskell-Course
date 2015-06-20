@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE InstanceSigs #-}
@@ -15,7 +16,7 @@ module Course.Applicative(
 import Course.Core
 import Course.Apply
 import Course.Id
-import Course.List
+import Course.List as L
 import Course.Optional
 import qualified Prelude as P
 
@@ -46,8 +47,7 @@ class Apply f => Applicative f where
   (a -> b)
   -> f a
   -> f b
-(<$>) =
-  error "todo: Course.Applicative#(<$>)"
+f <$> a = pure f <*> a
 
 -- | Insert into Id.
 --
@@ -56,8 +56,7 @@ instance Applicative Id where
   pure ::
     a
     -> Id a
-  pure =
-    error "todo: Course.Applicative pure#instance Id"
+  pure = Id
 
 -- | Insert into a List.
 --
@@ -66,8 +65,7 @@ instance Applicative List where
   pure ::
     a
     -> List a
-  pure =
-    error "todo: Course.Applicative pure#instance List"
+  pure a = a :. Nil
 
 -- | Insert into an Optional.
 --
@@ -76,8 +74,7 @@ instance Applicative Optional where
   pure ::
     a
     -> Optional a
-  pure =
-    error "todo: Course.Applicative pure#instance Optional"
+  pure = Full
 
 -- | Insert into a constant function.
 --
@@ -85,9 +82,8 @@ instance Applicative Optional where
 instance Applicative ((->) t) where
   pure ::
     a
-    -> ((->) t a)
-  pure =
-    error "todo: Course.Applicative pure#((->) t)"
+    -> (t -> a)
+  pure = const
 
 -- | Sequences a list of structures to a structure of list.
 --
@@ -109,8 +105,9 @@ sequence ::
   Applicative f =>
   List (f a)
   -> f (List a)
-sequence =
-  error "todo: Course.Applicative#sequence"
+sequence = \case
+  Nil   -> pure Nil
+  a:.as -> (:.) <$> a <*> sequence as
 
 -- | Replicate an effect a given number of times.
 --
@@ -133,8 +130,7 @@ replicateA ::
   Int
   -> f a
   -> f (List a)
-replicateA =
-  error "todo: Course.Applicative#replicateA"
+replicateA n a = sequence $ replicate n a
 
 -- | Filter a list with a predicate that produces an effect.
 --
@@ -161,8 +157,8 @@ filtering ::
   (a -> f Bool)
   -> List a
   -> f (List a)
-filtering =
-  error "todo: Course.Applicative#filtering"
+filtering p as = (map fst . filter snd . zip as) <$> (sequence $ map p as)
+-- TODO: lucid, but slow
 
 -----------------------
 -- SUPPORT LIBRARIES --
