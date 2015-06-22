@@ -157,8 +157,8 @@ filtering ::
   (a -> f Bool)
   -> List a
   -> f (List a)
-filtering p as = (map fst . filter snd . zip as) <$> (sequence $ map p as)
--- TODO: lucid, but slow
+filtering p as = foldRight f (pure Nil) as
+  where f a as' = (\b -> if b then (a:.) else id) <$> p a <*> as'
 
 -----------------------
 -- SUPPORT LIBRARIES --
