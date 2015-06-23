@@ -134,8 +134,7 @@ join ::
   Bind f =>
   f (f a)
   -> f a
-join =
-  error "todo: Course.Bind#join"
+join a = id =<< a
 
 -- | Implement a flipped version of @(=<<)@, however, use only
 -- @join@ and @(<$>)@.
@@ -148,8 +147,7 @@ join =
   f a
   -> (a -> f b)
   -> f b
-(>>=) =
-  flip (=<<)
+a >>= f = join (f <$> a)
 
 infixl 1 >>=
 
@@ -162,10 +160,8 @@ infixl 1 >>=
   Bind f =>
   (b -> f c)
   -> (a -> f b)
-  -> a
-  -> f c
-(<=<) =
-  error "todo: Course.Bind#(<=<)"
+  -> (a -> f c)
+f <=< g = \a -> g a >>= f
 
 infixr 1 <=<
 
